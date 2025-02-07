@@ -26,8 +26,15 @@ jobs:
 
       - name: Pull repo on EC2
         run: |
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 
-            "( cd /var/www/daw_cd || ( mkdir -p /var/www/daw_cd && cd /var/www/daw_cd ) ) && git pull"
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            if [ -d /var/www/daw_cd/.git ]; then
+                echo 'Repository exists. Pulling latest changes...'
+                cd /var/www/daw_cd && git pull;
+            else
+                echo 'Repository does not exist. Cloning repository...'
+                git clone https://github.com/fruizotero/daw_cd.git /var/www/daw_cd;
+            fi
+            "
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
